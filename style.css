@@ -2,6 +2,11 @@
   width: 800px;
   height: 600px;
   background-color: #000;
-  margin: 0 auto;
+  border: 2px solid #200409;
+  margin: auto;
+  padding: 10px;
 } 
 
+body {
+  background: #111111;
+}
