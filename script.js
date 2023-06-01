@@ -1,136 +1,120 @@
-window.requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(a){window.setTimeout(a,1E3/60)}}();
+// Get the canvas element
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-document.onselectstart = function() {
-  return false;
-};
-var c = document.getElementById('c');
-var ctx = c.getContext('2d');
-var dpr = window.devicePixelRatio;
-var cw = window.innerWidth;
-var ch = window.innerHeight;
-c.width = cw * dpr;
-c.height = ch * dpr;
-ctx.scale(dpr, dpr);
-var rand = function(rMi, rMa){return ~~((Math.random()*(rMa-rMi+1))+rMi);}
-ctx.lineCap = 'round';
-var orbs = [];
-var orbCount = 30;
-var radius;
+// Ball variables
+let ballX = canvas.width / 2;
+let ballY = canvas.height - 30;
+let ballRadius = 10;
+let ballDX = 2;
+let ballDY = -2;
 
-var trailCB = document.getElementById('trail');
-var trail = trailCB.checked;
-var clearer = document.getElementById('clear');
+// Paddle variables
+let paddleWidth = 75;
+let paddleHeight = 10;
+let paddleX = (canvas.width - paddleWidth) / 2;
 
-function createOrb(mx,my){
-  var dx = (cw/2) - mx;
-	var dy = (ch/2) - my;
-	var dist = Math.sqrt(dx * dx + dy * dy);
-	var angle = Math.atan2(dy, dx);
-	orbs.push({
-		x: mx,
-		y: my,
-		lastX: mx,
-		lastY: my,
-		hue: 0,
-		colorAngle: 0,
-		angle: angle + Math.PI/2,
-		//size: .5+dist/250,
-		size: rand(1,3)/2,
-		centerX: cw/2,
-		centerY: ch/2,		
-		radius: dist,
-		speed: (rand(5,10)/1000)*(dist/750)+.015,
-		alpha: 1 - Math.abs(dist)/cw,
-		draw: function() {			
-			ctx.strokeStyle = 'hsla('+this.colorAngle+',100%,50%,1)';	
-			ctx.lineWidth = this.size;			
-			ctx.beginPath();
-			ctx.moveTo(this.lastX, this.lastY);
-			ctx.lineTo(this.x, this.y);
-			ctx.stroke();
-		},	
-		update: function(){
-			var mx = this.x;
-			var my = this.y;	
-			this.lastX = this.x;
-			this.lastY = this.y;
-			var x1 = cw/2;
-			var y1 = ch/2;
-			var x2 = mx;
-			var y2 = my;		
-			var rise = y1-y2;
-			var run = x1-x2;
-			var slope = -(rise/run);
-			var radian = Math.atan(slope);
-			var angleH = Math.floor(radian*(180/Math.PI));		
-			if(x2 < x1 && y2 < y1){angleH += 180;}		
-			if(x2 < x1 && y2 > y1){angleH += 180;}		
-			if(x2 > x1 && y2 > y1){angleH += 360;}		
-			if(y2 < y1 && slope =='-Infinity'){angleH = 90;}		
-			if(y2 > y1 && slope =='Infinity'){angleH = 270;}		
-			if(x2 < x1 && slope =='0'){angleH = 180;}
-			if(isNaN(angleH)){angleH = 0;}
-			
-			this.colorAngle = angleH;
-			this.x = this.centerX + Math.sin(this.angle*-1) * this.radius;
-			this.y = this.centerY + Math.cos(this.angle*-1) * this.radius;
-			this.angle += this.speed;
-		
-		}
-	});
-}
+// Brick variables
+let brickRowCount = 3;
+let brickColumnCount = 5;
+let brickWidth = 75;
+let brickHeight = 20;
+let brickPadding = 10;
+let brickOffsetTop = 30;
+let brickOffsetLeft = 30;
 
-function orbGo(e){
-	var mx = e.pageX - c.offsetLeft;
-	var my = e.pageY - c.offsetTop;		
-	createOrb(mx,my);
-}
+// Game variables
+let score = 0;
+let lives = 3;
+let level = 1;
 
-function turnOnMove(){
-	c.addEventListener('mousemove', orbGo, false);	
-}
-
-function turnOffMove(){
-	c.removeEventListener('mousemove', orbGo, false);	
-}
-
-function toggleTrails(){
-	trail = trailCB.checked;
-}
-
-function clear(){
- orbs = []; 
-}
-
-c.addEventListener('mousedown', orbGo, false);
-c.addEventListener('mousedown', turnOnMove, false);
-c.addEventListener('mouseup', turnOffMove, false);
-trailCB.addEventListener('change', toggleTrails, false);
-clearer.addEventListener('click', clear, false);
-
-var count = 100;
-while(count--){
-		createOrb(cw/2, ch/2+(count*2));
-}
-
-var loop = function(){
-  window.requestAnimFrame(loop);
-	if(trail){
-		ctx.fillStyle = 'rgba(0,0,0,.1)';
-		ctx.fillRect(0,0,cw,ch);
-	} else {
-		ctx.clearRect(0,0,cw,ch);
+function draw() {
+	// Clear the canvas
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+	// Draw the ball
+	ctx.beginPath();
+	ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+	ctx.fillStyle = "#0095DD";
+	ctx.fill();
+	ctx.closePath();
+  
+	// Draw the paddle
+	ctx.beginPath();
+	ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+	ctx.fillStyle = "#0095DD";
+	ctx.fill();
+	ctx.closePath();
+  
+	// Draw the bricks
+	for (let row = 0; row < brickRowCount; row++) {
+	  for (let col = 0; col < brickColumnCount; col++) {
+		let brickX = col * (brickWidth + brickPadding) + brickOffsetLeft;
+		let brickY = row * (brickHeight + brickPadding) + brickOffsetTop;
+		ctx.beginPath();
+		ctx.rect(brickX, brickY, brickWidth, brickHeight);
+		ctx.fillStyle = "#0095DD";
+		ctx.fill();
+		ctx.closePath();
+	  }
 	}
-	var i = orbs.length;
-	while(i--){	
-		var orb = orbs[i];	
-		var updateCount = 3;
-		while(updateCount--){
-		orb.update();		
-		orb.draw(ctx);
-		}
-		
+  }
+
+  function update() {
+	// Move the ball
+	ballX += ballDX;
+	ballY += ballDY;
+  
+	// Bounce the ball off the walls
+	if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
+	  ballDX = -ballDX;
+	}
+	if (ballY - ballRadius < 0) {
+	  ballDY = -ballDY;
+	}
+  
+	// Check for collision with the paddle
+	if (
+	  ballY + ballDY > canvas.height - paddleHeight &&
+	  ballX + ballRadius > paddleX &&
+	  ballX - ballRadius < paddleX + paddleWidth
+	) {
+	  ballDY = -ballDY;
+	}
+  
+	// Check for collision with bricks
+  
+	// Move the paddle
+  
+	// Update the score and lives
+  
+	// Call the draw function to redraw the game elements
+	draw();
+  }
+
+  document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+function keyDownHandler(event) {
+	if (event.key === "ArrowRight") {
+	  paddleX += 7; // Move the paddle right by 7 pixels
+	} else if (event.key === "ArrowLeft") {
+	  paddleX -= 7; // Move the paddle left by 7 pixels
 	}
 }
-            
-loop();
+
+function keyUpHandler(event) {
+  if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+    // Stop moving the paddle
+  }
+}
+
+function gameLoop() {
+	update();
+	draw();
+	requestAnimationFrame(gameLoop);
+  }
+  
+  // Start the game loop
+  gameLoop();
+  
