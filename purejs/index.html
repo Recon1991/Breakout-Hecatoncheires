@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title>GameDev Canvas Breakout</title>
+        // I love inline css stylesheets
+        <style>
+            * { 
+                padding: 0;
+                margin: 0;
+            }
+            canvas {
+                background: #eee;
+                display: block;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        // Put that canvas inside the body
+        <canvas id="myCanvas" width="480" height="320"></canvas>
+
+        // Code goes in the script below
+        <script>
+            // Set canvas and ctx
+            const canvas = document.getElementById("myCanvas");
+            const ctx = canvas.getContext("2d");
+
+            let x = canvas.width / 2;
+            let y = canvas.height - 30;
+
+            // Main Draw Function Loop
+            function draw() {
+                
+
+
+                ctx.beginPath();
+                ctx.arc(50, 50, 10, 0, Math.PI * 2);
+                ctx.fillStyle = "purple";
+                ctx.fill();
+                ctx.closePath();
+            
+            }
+
+            // Set Frame Rate/Refresh
+            setInterval(draw, 10);
+
+        </script>
+    </body>
+</html>

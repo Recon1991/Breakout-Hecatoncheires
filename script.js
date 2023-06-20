@@ -196,4 +196,3 @@ function gameLoop() {
   
 // Start the game loop
 gameLoop();
-  
