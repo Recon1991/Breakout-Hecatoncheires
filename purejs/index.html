@@ -58,7 +58,7 @@
             for(var c = 0; c < brickColomnCount; c++) {
                 bricks[c] = [];
                 for(var r = 0; r < brickRowCount; r++) {
-                    bricks[c][r] = {x: 0, y: 0};
+                    bricks[c][r] = { x: 0, y: 0, status: 1 };
                 }
             }
 
@@ -81,18 +81,34 @@
                 }
             }
 
+            function collisionDetection() {
+                for (var c = 0; c < brickColomnCount; c++) {
+                    for (var r = 0; r < brickRowCount; r++) {
+                        var b = bricks[c][r];
+                        if (b.status == 1) {
+                            if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                                dy = -dy;
+                                b.status = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
             function drawBricks() {
                 for (let c = 0; c < brickColomnCount; c++) { 
                     for (let r = 0; r < brickRowCount; r++) {
-                        const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
-                        const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
-                        bricks[c][r].x = brickX;
-                        bricks[c][r].y = brickY;
-                        ctx.beginPath();
-                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                        ctx.fillStyle = "green";
-                        ctx.fill();
-                        ctx.closePath();
+                        if (bricks[c][r].status == 1) {
+                            const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+                            const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+                            bricks[c][r].x = brickX;
+                            bricks[c][r].y = brickY;
+                            ctx.beginPath();
+                            ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                            ctx.fillStyle = "green";
+                            ctx.fill();
+                            ctx.closePath();
+                        }
                     }
                 }
             }
@@ -120,12 +136,13 @@
                 }
             }
 
-            // Main Draw Function Loop
+            // Main Draw Loop
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 drawBall();
                 drawPaddle();
                 drawBricks();
+                collisionDetection();
 
                 // Ball Collision against wall detection
                 if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
@@ -158,7 +175,6 @@
 
             // Set Frame Rate/Refresh
             var interval = setInterval(draw, 10);
-
 
         </script>
     </body>
