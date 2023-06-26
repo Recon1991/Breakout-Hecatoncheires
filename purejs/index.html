@@ -46,6 +46,7 @@
 
             // Score Variables
             let score = 0;
+            let lives = 3;
 
             // Set brick variables
             const brickRowCount = 3;
@@ -67,6 +68,7 @@
 
             document.addEventListener("keydown", keyDownHandler, false);
             document.addEventListener("keyup", keyUpHandler, false);
+            document.addEventListener("mousemove", mouseMoveHandler, false);
 
             function keyDownHandler(e)  {
                 if (e.key === "Right" || e.key === "ArrowRight") {
@@ -84,6 +86,13 @@
                 }
             }
 
+            function mouseMoveHandler(e) {
+                var relativeX = e.clientX - canvas.offsetLeft;
+                if (relativeX > 0 && relativeX < canvas.width) {
+                    paddleX = relativeX - paddleWidth / 2;
+                }
+            }
+            
             function collisionDetection() {
                 for (var c = 0; c < brickColomnCount; c++) {
                     for (var r = 0; r < brickRowCount; r++) {
@@ -94,9 +103,8 @@
                                 b.status = 0;
                                 score++;
                                 if (score == brickRowCount * brickColomnCount) {
-                                    alert("YOU WIN!");
+                                    alert("YOU WIN! Final Score: " + score);
                                     document.location.reload();
-                                    clearInterval(interval); // Chrome stuff again
                                 }
                             }
                         }
@@ -145,6 +153,12 @@
                 ctx.fillText("Score: "+score, 8, 20);
             }
 
+            function drawLives() {
+                ctx.font = "16px Arial";
+                ctx.fillStyle = "FFFFFF";
+                ctx.fillText("Lives: "+lives, canvas.width - 65, 20);
+            }
+
             function acceleratePaddle() {
                 if (paddleSpeed < maxPaddleSpeed){
                     paddleSpeed += acceleration;
@@ -158,6 +172,7 @@
                 drawBall();
                 drawPaddle();
                 drawScore();
+                drawLives();
                 collisionDetection();
 
                 // Ball Collision against wall detection
@@ -172,9 +187,18 @@
                         dy = -dy;
                     }
                     else {
-                        alert("GAME OVER");
-                        document.location.reload();
-                        clearInterval(interval); // Needed for Chrome to end game
+                        lives--;
+                        if(!lives){
+                            alert("GAME OVER");
+                            document.location.reload();
+                            
+                        } else {
+                            x = canvas.width / 2;
+                            y = canvas.height - 30;
+                            dx = 2;
+                            dy = -2;
+                            paddleX = (canvas.width - paddleWidth) / 2;
+                        }
                     }
                 }
 
@@ -187,10 +211,11 @@
                 // Set x and y velocity
                 x += dx;
                 y += dy;
+                requestAnimationFrame(draw);
             }
 
             // Set Frame Rate/Refresh
-            var interval = setInterval(draw, 10);
+            draw();
 
         </script>
     </body>
