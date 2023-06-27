@@ -1,12 +1,5 @@
-#gameCanvas {
-  width: 800px;
-  height: 600px;
-  background-color: #000;
-  border: 2px solid #200409;
-  margin: auto;
-  padding: 10px;
-} 
-
-body {
-  background: #111111;
+* {
+  padding: 0;
+  margin: 0;
 }
+
