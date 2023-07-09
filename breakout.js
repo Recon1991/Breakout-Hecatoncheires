@@ -33,9 +33,18 @@ function preload() {
     this.load.image('brick1', 'assets/images/brick1_64_32.png');
     this.load.image('brick2', 'assets/images/brick2_64_32.png');
     this.load.image('brick3', 'assets/images/brick3_64_32.png');
+    this.load.image('bg', 'assets/images/background.png');
+    this.load.audio('audio_paddleBallHit', 'assets/sound/paddleBallHit-sine1.mp3');
+    this.load.audio('audio_brickBallHit', 'assets/sound/brickBallHit-sine1.mp3');
 }
 
 function create() {
+    backgroundImage = this.add.sprite(
+        this.physics.world.bounds.width / 2, // x position
+        this.physics.world.bounds.height / 2, // y position
+        'bg', // background image for the sprite
+    );
+    
     player = this.physics.add.sprite(
         400, // x position
         600, // y position
@@ -140,6 +149,11 @@ function create() {
 
     player.setImmovable(true);
     this.physics.add.collider(ball, player, hitPlayer, null, this);
+
+    this.paddleBallHit = this.sound.add('audio_paddleBallHit');
+    this.brickBallHit = this.sound.add('audio_brickBallHit');
+
+
 }
 
 function update() {
@@ -182,6 +196,9 @@ function isWon() {
 function hitBrick(ball, brick) {
     brick.disableBody(true, true);
 
+    // Play Sound Effect File
+    this.brickBallHit.play();
+
     if (ball.body.velocity.x == 0) {
         randNum = Math.random();
         if (randNum >= 0.5) {
@@ -193,10 +210,13 @@ function hitBrick(ball, brick) {
 }
 
 function hitPlayer(ball, player) {
-    ball.setVelocityY(ball.body.velocity.y - 5);
+    ball.setVelocityY(ball.body.velocity.y - 5 * (player.x - ball.x));
 
     let newXVelocity = Math.abs(ball.body.velocity.x) + 5;
+    // Play Sound effect file
+    this.paddleBallHit.play();
 
+    // 
     if (ball.x < player.x) {
         ball.setVelocityX(-newXVelocity);
     } else {
